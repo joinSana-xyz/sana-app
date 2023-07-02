@@ -3,7 +3,7 @@ import {StyleSheet, Text, View, Button, TextInput, Image, SafeAreaView, Touchabl
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth} from "../config/firebase"
 
-import Signin from "./screens/Signin"
+import Signin from "./Signin"
 export default function SignUp({navigation}) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
