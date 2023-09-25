@@ -1,34 +1,78 @@
-import React, { useState } from "react";
+import React, {useState, useEffect, useLayoutEffect, useCallback} from "react";
 import {StyleSheet, Text, View, Button, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert} from "react-native";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth} from "../config/firebase"
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import DatePicker from 'react-native-date-picker'
+import { auth, database} from "../config/firebase"
+import {doc, setDoc, deleteDoc} from 'firebase/firestore';
 
 import Signin from "./Signin"
 export default function SignUp({navigation}) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
-    const onHandleSignUp = () => {
+    const [fName, setFName] = useState("");
+    const [lName, setLName] = useState("");
+    const [code, setCode] = useState("");
+    const [birthday, setBirthday] = useState(new Date())
+    const cids = ["OgrB6M9OcEkMLLoyqbQ5"]; //conversation IDs
+    const gids = [];
+   const onHandleSignUp = () => {
         if (email !== "" && password !== "") {
-            createUserWithEmailAndPassword(auth, email, password)
-                .then(() => console.log("Succesfully created account"))
+            createUserWithEmailAndPassword(auth, email, password).then(cred => {
+                setDoc(doc(database, "users", cred.user.uid), {
+                    email: email,
+                    fName: fName,
+                    lName: lName,
+                    cids: cids,
+                });
+                sendEmailVerification(cred.user);
+                const codeRef = doc(database, "codes", code)
+                deleteDoc(codeRef);
+            })
                 .catch((err) => Alert.alert("Sign Up error", err.message));
-        }
+            };
     };
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {flexDirection:'row'}]}>
+            <View style={[styles.headerBigBox, {flex:2}]}>
+                <Text style={styles.bigText}>Welcome to</Text>
+                <Image style={styles.logo} source={require('../images/sana-logo.png')}/>
+                <Text style={styles.smallBigText}>Please Sign in to Continue</Text>
+            </View>
+            <View style={[styles.signInBigBox, {flex:1}]}>
+            <View style={styles.signInSmallBox}>
             <SafeAreaView style={styles.form}>
                 <Text style={styles.title}> Sign Up</Text>
-                <TextInput
+                <Text style={styles.headerTitle}>First Name</Text>
+                <TextInput style={styles.input}
+                    autoCapitalize="word"
+                    placeholder="first name"
+                    autoFocus={true}
+                    value={fName}
+                    onChangeText={(text) => setFName(text)} 
+                />
+                <View style={styles.hairline} />
+                <Text style={styles.headerTitle}>Last Name</Text>
+                <TextInput style={styles.input}
+                    autoCapitalize="word"
+                    placeholder="last name"
+                    autoFocus={true}
+                    value={lName}
+                    onChangeText={(text) => setLName(text)} 
+                />
+                <View style={styles.hairline} />
+                <Text style={styles.headerTitle}>Email Address</Text>
+                <TextInput style={styles.input}
                     autoCapitalize="none"
-                    placeholder="email place"
+                    placeholder="Email Address"
                     keyboardType = "email-address"
                     textContentType = "emailAddress"
                     autoFocus={true}
                     value={email}
                     onChangeText={(text) => setEmail(text)} 
                 />
-                <TextInput
+                <View style={styles.hairline} />
+                <Text style={styles.headerTitle}>Password</Text>
+                <TextInput style={styles.input}
                     autoCapitalize="none"
                     placeholder="password"
                     autoCorrect={false}
@@ -37,34 +81,86 @@ export default function SignUp({navigation}) {
                     value={password}
                     onChangeText={(text) => setPassword(text)} 
                 />
+                <View style={styles.hairline} />
+                <Text style={styles.headerTitle}>Verification Code</Text>
+                <TextInput style={styles.input}
+                    autoCapitalize="none"
+                    placeholder="Verification Code"
+                    autoCorrect={false}
+                    value={code}
+                    onChangeText={(text) => setCode(text)} 
+                />
+                <View style={styles.hairline} />
+                <Text style={styles.headerTitle}>Birthday</Text>
+                <DatePicker date={birthday} onDateChange={setBirthday} />
                 <TouchableOpacity style={styles.button} onPress={onHandleSignUp}>
-                    <Text style={styles.buttonText}> Sign Up</Text>
+                    <Text style={styles.buttonText}>Sign Up</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Signin")}>
-                    <Text style={styles.buttonText}>Already Have An Account? Sign In </Text>
-                </TouchableOpacity>
+                         <Text>Already have an account? 
+                <Text style={{color:"red"}}onPress={() => navigation.navigate("Signin")}> Log In! </Text>
+                </Text>
             </SafeAreaView>
         </View>
+            </View>
+            </View>
     )
 }
 
 const styles = StyleSheet.create({
+    headerBigBox:{
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    bigText:{
+        fontSize: 100,
+        fontFamily: "Futara",
+        fontWeight: "bold",
+    },
+    smallBigText:{
+        fontSize: 40,
+        fontFamily: "Futara",
+    },
+    logo: {
+        width: 400,
+        height: 250,
+        resizeMode: "contain",
+
+    },
+    signInBigBox:{
+        backgroundColor: "#c3cfe1",
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    hairline: {
+        backgroundColor: '#c3cfe1',
+        height: 2,
+        width: 200,
+        marginBottom: 15,
+    },
+    signInSmallBox: {
+        backgroundColor: "white",
+        padding:40,
+        borderRadius: 10,
+        alignItems: 'start',
+        justifyContent: 'left',
+    },
+    headerTitle: {
+        marginBottom:10,
+    },
     container: {
         flex:1,
-        backgroundColor: "purple",
+        backgroundColor: "white",
     },
     title: {
         fontSize:36,
         fontWeight: 'bold',
-        color: "orange",
+        color: "black",
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: 20,
     },
     input: {
-        backgroundColor: "red",
-        height: 58,
-        marginBottom: 20,
-        fontSize: 16,
-        borderRadius: 10,
-        padding: 12,
+        color:"#cbcbcb"
     },
     form: {
         flex:1,
@@ -72,16 +168,17 @@ const styles = StyleSheet.create({
         marginHorizontal: 30,
     },
     button: {
-        backgroundColor: "blue",
-        height: 58,
+        backgroundColor: "#6073b7",
+        height: 40,
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 40,
+        margin: 20,
+        color: "white",
     },
     buttonText: {
         fontWeight: "bold",
-        color: "black",
+        color: "white",
         fontSize: 18,
     },
 });

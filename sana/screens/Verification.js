@@ -1,63 +1,25 @@
 import React, { useState } from "react";
 import {StyleSheet, Text, View, Button, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert} from "react-native";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth} from "../config/firebase"
 
-export default function SignIn({navigation}) {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+export default function Verification({navigation}) {
 
-    const onHandleSignIn = () => {
-        if (email !== "" && password !== "") {
-            signInWithEmailAndPassword(auth, email, password)
-                .then(cred => {
-                    if (!cred.user.emailVerified){
-                        console.log("hellpo");
-                    }
-                }
-                )
-                .catch((err) => Alert.alert("Login error", err.message));
-        }
-    };
     return (
         <View style={[styles.container, {flexDirection:'row'}]}>
             <View style={[styles.headerBigBox, {flex:2}]}>
                 <Text style={styles.bigText}>Welcome to</Text>
                 <Image style={styles.logo} source={require('../images/sana-logo.png')}/>
-                <Text style={styles.smallBigText}>Please Sign in to Continue</Text>
             </View>
             <View style={[styles.signInBigBox, {flex:1}]}>
             <View style={styles.signInSmallBox}>
             <SafeAreaView style={styles.form}>
-                <Text style={styles.title}>Sign In</Text>
-                <Text style={styles.headerTitle}>Email</Text>
-                <TextInput style={styles.input}
-                    autoCapitalize="none"
-                    placeholder="Enter Email Address"
-                    keyboardType = "email-address"
-                    textContentType = "emailAddress"
-                    autoFocus={true}
-                    value={email}
-                    onChangeText={(text) => setEmail(text)} 
-                />
-                <View style={styles.hairline} />
-                <Text style={styles.headerTitle}>Password</Text>
-                <TextInput style={styles.input}
-                    autoCapitalize="none"
-                    placeholder="Enter Password"
-                    autoCorrect={false}
-                    secureTextEntry={true}
-                    textContentType = "password"
-                    value={password}
-                    onChangeText={(text) => setPassword(text)} 
-                />
-                <View style={styles.hairline} />
-                <TouchableOpacity style={styles.button} onPress={onHandleSignIn}>
-                    <Text style={styles.buttonText}>Sign In</Text>
+                <Text style={styles.title}>Email Verification</Text>
+                <Text>Please check your email for a verification link to proceed.</Text>
+                <Text style={{color:"red"}}onPress={() => sendEmailVerification(auth.currentUser)}>Resend verification email</Text>
+                <TouchableOpacity style={styles.button} onPress={navigation.navigate("Contacts")}>
+                    <Text style={styles.buttonText}> Proceed</Text>
                 </TouchableOpacity>
-                <Text> New User? 
-                <Text style={{color:"red"}}onPress={() => navigation.navigate("Signup")}> Sign Up! </Text>
-                </Text>
             </SafeAreaView>
             </View>
         </View>

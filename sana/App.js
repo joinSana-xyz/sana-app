@@ -6,8 +6,11 @@ import { onAuthStateChanged } from "firebase/auth"
 
 import Home from "./screens/Home";
 import Chat from "./screens/Chat";
+import Contacts from "./screens/Contacts";
 import Signin from "./screens/Signin"
 import Signup from "./screens/Signup"
+import Verification from "./screens/Verification"
+import Settings from "./screens/Settings"
 import {auth} from "./config/firebase"
 
 const Stack = createStackNavigator();
@@ -31,20 +34,29 @@ const AuthenticatedUserProvider = ({children}) => {
 */
 function AuthStack() {
   return (
-  <Stack.Navigator defaultScreenOptions={Signin}>
-      <Stack.Screen name="Signin" component={Signin} />
-      <Stack.Screen name="Signup" component={Signup} />
+  <Stack.Navigator defaultScreenOptions={Signin }>
+      <Stack.Screen name="Signin" component={Signin} options={{headerShown: false}} />
+      <Stack.Screen name="Signup" component={Signup} options={{headerShown: false}}/>
   </Stack.Navigator>
   )
 }
 function ChatStack () {
   return (
     <Stack.Navigator defaultScreenOptions={Home}>
-      <Stack.Screen name="Chat" component={Chat} />
+      <Stack.Screen name="Contacts" component={Contacts} options={{headerShown: false}} />
+      <Stack.Screen name="Settings" component={Settings} options={{headerShown: true}} />
+      <Stack.Screen name="Chat" component={Chat} options={({route}) => ({
+        title: route.params.userName,
+        headerBackTitleVisible: false
+      }) }/>
       <Stack.Screen name="Home" component={Home} />
     </Stack.Navigator>
   )
 }
+/* <Stack.Screen name="Chat" component={Chat}       options={({route}) => ({
+        title: route.params.userName,
+        headerBackTitleVisible: false,
+      })} /> */
 function RootNavigator () {
   const { user, setUser } = useContext(AuthenticatedUserContext);
   const [loading, setLoading] = useState(true);
@@ -69,6 +81,8 @@ function RootNavigator () {
   )
 }
 export default function App() {
+  //Text.defaultProps = Text.defaultProps || {}
+  //Text.defaultProps.style =  { fontFamily: 'Futara' }
   return (
     <AuthenticatedUserProvider>
         <RootNavigator />
