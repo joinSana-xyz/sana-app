@@ -16,8 +16,8 @@ const InChatFileTransfer = ({filePath}) => {
          <Image
             source={
               fileType === 'pdf'
-                ? require('../assests/chat_file.png')
-                : require('../assests/unknowFile.png')
+                ? require('../assets/chat_file.png')
+                : require('../assets/chat_file.png')
             }
             style={{height: 60, width: 60}}
           />

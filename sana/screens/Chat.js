@@ -9,11 +9,13 @@ import {signOut} from 'firebase/auth';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {auth, database} from '../config/firebase';
 import {useRoute } from "@react-navigation/native";
+//import { Icon } from 'react-native-elements';
 import {doc, collection, addDoc, arrayUnion, orderBy, query, onSnapshot} from 'firebase/firestore';
-//import InChatFileTransfer from '../components/InChatFileTranfer';
+import Animated, {
+	useSharedValue,
+} from "react-native-reanimated";
+///import InChatFileTransfer from '../components/InChatFileTransfer';
 //import InChatViewFile from '../components/InChatViewFile';
-//import * as DocumentPicker from 'react-native-document-picker';
-
 import EmojiPicker from "../components/emoji/EmojiPicker";
 
 import ReplyMessageBar from '../components/ReplyMessageBar';
@@ -26,8 +28,11 @@ export default function Chat({navigation}) {
   const [isAttachFile, setIsAttachFile] = useState(false);
   const [fileVisible, setFileVisible] = useState(false);
   const [imagePath, setImagePath] = useState('');
-  const [filePath, setFilePath] = useState('');
-	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [filePath, setFilePath] = useState('');	
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const height = useSharedValue(70);
+
+
     const clearReplyMessage = () => setReplyMessage(null);
     //const navigation = useNavigation();
     //const route = useRoute();
@@ -46,82 +51,67 @@ export default function Chat({navigation}) {
         })
     }, [navigation]);
     */
-   /*
-   const _pickDocument = async () => {
-  try {
-    const result = await DocumentPicker.pick({
-      type: [DocumentPicker.types.allFiles],
-      copyTo: 'documentDirectory',
-      mode: 'import',
-      allowMultiSelection: true,
-    });
-    const fileUri = result[0].fileCopyUri;
-    console.log(fileUri);
-    if (!fileUri) {
-      console.log('File URI is undefined or null');
-      return;
-    }
-    if (fileUri.indexOf('.png') !== -1 || fileUri.indexOf('.jpg') !== -1) {
-      setImagePath(fileUri);
-      setIsAttachImage(true);
-    } else {
-      setFilePath(fileUri);
-      setIsAttachFile(true);
-    }
-  } catch (err) {
-    if (DocumentPicker.isCancel(err)) {
-      console.log('User cancelled file picker');
-    } else {
-      console.log('DocumentPicker err => ', err);
-      throw err;
-    }
-  }
+
+const pickImageasync = async () => {
+ const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+ let imgURI = null;
+ const hasStoragePermissionGranted = status === "granted";
+
+if(!hasStoragePermissionGranted) return null;
+
+ 
+ let result = await ImagePicker.launchImageLibraryAsync({
+   mediaTypes: ImagePicker.MediaTypeOptions.Images,
+   allowsEditing: true,
+   aspect: [4, 4],
+   quality: 1,
+ });
+
+ if (!result.cancelled) {
+   imgURI = result.uri;
+ }
+
+ return imgURI;
+};
+pickImageasync();
+const uploadImageToStorage= async (imgURI ) => {
+  const ref = `messages/${[FILE_REFERENCE_HERE]}`
+
+  const imgRef = firebase.storage().ref(ref);
+
+  const metadata = { contentType: "image/jpg" };
+  
+
+  // Fetch image data as BLOB from device file manager 
+
+  const blob = await new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      resolve(xhr.response);
+    };
+    xhr.onerror = function (e) {
+      reject(new TypeError("Network request failed"));
+    };
+    xhr.responseType = "blob";
+    xhr.open("GET", imgURI, true);
+    xhr.send(null);
+  });
+  // Put image Blob data to firebase servers
+  await imgRef.put(blob, metadata);
+
+  // We're done with the blob, close and release it
+  blob.close();
+
+  // Image permanent URL
+  const url = await imgRef.getDownloadURL();
+
+ 
+  return url
 };
 
-const renderChatFooter = useCallback(() => {
-  if (imagePath) {
-    return (
-      <View style={styles.chatFooter}>
-        <Image source={{uri: imagePath}} style={{height: 75, width: 75}} />
-        <TouchableOpacity
-          onPress={() => setImagePath('')}
-          style={styles.buttonFooterChatImg}
-        >
-          <Text style={styles.textFooterChat}>X</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-  if (filePath) {
-    return (
-      <View style={styles.chatFooter}>
-        <InChatFileTransfer
-          filePath={filePath}
-        />
-        <TouchableOpacity
-          onPress={() => setFilePath('')}
-          style={styles.buttonFooterChat}
-        >
-          <Text style={styles.textFooterChat}>X</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-  return null;
-}, [filePath, imagePath]);
-   const renderCustomInputToolbar = (props) => (
-    <InputToolbar
-      {...props}
-      containerStyle={styles.inputContainer}
-      accessoryStyle={styles.replyBarContainer}
-    />
-  );
-   const renderAccessory = () => (
-    <ReplyMessageBar
-    message = {{text:replyMessage}} clearReply={clearReplyMessage}
-    />
-    );
-    const renderBubble = (props) => {
+uploadImageToStorage("what");
+const renderBubble = (props) => {
   const {currentMessage} = props;
   if (currentMessage.file && currentMessage.file.url) {
     return (
@@ -170,7 +160,7 @@ const renderChatFooter = useCallback(() => {
     />
   );
 };
-    const renderReplyMessageView = (props) =>
+    const renderReplyMessageView = (props) => {
     props.currentMessage &&
     props.currentMessage.replyMessage && (
       <View style={styles.replyMessageContainer}>
@@ -178,10 +168,10 @@ const renderChatFooter = useCallback(() => {
         <View style={styles.replyMessageDivider} />
       </View>
     );
+    }
     const scrollToBottomComponent = () => {
         return <FontAwesome name="angle-double-down" size={22} color="#333" />;
     };
-    */
       const renderCustomInputToolbar = (props) => (
     <InputToolbar
       {...props}
@@ -214,13 +204,35 @@ const renderChatFooter = useCallback(() => {
     }, []);
     const onSend = useCallback((messages= []) => {
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
-        const {_id, createdAt, text, user, reply} = messages[0];
+        const {_id, createdAt, text, user} = messages[0];
         addDoc(collection(database, 'chat', cid, "chat"), {
-            _id, createdAt, text, user, reply
+            _id, createdAt, text, user, replyMessage
         });
         console.log(messages)
         console.log(messages)
     });
+      const renderSend = (props) => {
+  return (
+    <View style={{flexDirection: 'row'}}>
+      <TouchableOpacity onPress={() => setShowEmojiPicker((value) => !value)}>
+        <Icon
+          type="font-awesome"
+          name="paperclip"
+          style={styles.paperClip}
+          size={28}
+          color='blue'
+        />
+      </TouchableOpacity>
+      <View>
+          {
+              showEmojiPicker ? (
+                  <EmojiPicker/>
+              ) : null
+          }
+          </View>
+    </View>
+  );
+};
     return (
         <GiftedChat
             messages={messages}
@@ -230,12 +242,14 @@ const renderChatFooter = useCallback(() => {
                 name:auth?.currentUser?.email,
             }}
             renderUsernameOnMessage={true}
+            renderSend={renderSend}
             onPress = {(_, message) => setReplyMessage(message.text)}
             renderAccessory = {renderAccessory}
+            renderBubble={renderBubble}
 
         />
     )
-}
+        }
 
 const styles = StyleSheet.create({
     
