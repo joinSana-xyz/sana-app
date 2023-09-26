@@ -24,9 +24,6 @@ const TabBar = ({ navigationState, position, setIndex }) => {
 						style={styles.tab}
 						onPress={() => setIndex(index)}
 					>
-						<Animated.Text style={{ opacity, fontSize: 18 }}>
-							{route.title}
-						</Animated.Text>
 					</TouchableOpacity>
 				);
 			})}
@@ -52,5 +49,10 @@ const styles = StyleSheet.create({
 		paddingBottom: 5
 	}
 });
+/*
 
+						<Animated.Text style={{ opacity, fontSize: 18 }}>
+							{route.title}
+						</Animated.Text>
+						*/
 export default TabBar;

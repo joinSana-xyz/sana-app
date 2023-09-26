@@ -24,7 +24,7 @@ const EmojiPicker = () => {
 			navigationState={{index, routes}}
 			onIndexChange={setIndex}
 			renderScene={renderScene}
-			initialLayout={{ width: layout.width }}
+			initialLayout={{ width: 50 }}
 		/>
 	)
 }

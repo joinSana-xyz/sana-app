@@ -4,19 +4,18 @@ import { GiftedChat, Bubble,
   IMessage,
   InputToolbar,
   InputToolbarProps,
-  MessageProps, } from "react-native-gifted-chat";
+  MessageProps, Composer, Send } from "react-native-gifted-chat";
 import {signOut} from 'firebase/auth';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {auth, database} from '../config/firebase';
 import {useRoute } from "@react-navigation/native";
-//import { Icon } from 'react-native-elements';
+import { Icon } from 'react-native-elements';
 import {doc, collection, addDoc, arrayUnion, orderBy, query, onSnapshot} from 'firebase/firestore';
 import Animated, {
 	useSharedValue,
 } from "react-native-reanimated";
 ///import InChatFileTransfer from '../components/InChatFileTransfer';
 //import InChatViewFile from '../components/InChatViewFile';
-import EmojiPicker from "../components/emoji/EmojiPicker";
 
 import ReplyMessageBar from '../components/ReplyMessageBar';
 export default function Chat({navigation}) {
@@ -24,13 +23,8 @@ export default function Chat({navigation}) {
     const route = useRoute()
     const [messages, setMessages] = useState([]);
     const [replyMessage, setReplyMessage] = useState([]);
-  const [isAttachImage, setIsAttachImage] = useState(false);
-  const [isAttachFile, setIsAttachFile] = useState(false);
-  const [fileVisible, setFileVisible] = useState(false);
-  const [imagePath, setImagePath] = useState('');
-  const [filePath, setFilePath] = useState('');	
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const height = useSharedValue(70);
+  //const height = useSharedValue(70);
 
 
     const clearReplyMessage = () => setReplyMessage(null);
@@ -39,7 +33,6 @@ export default function Chat({navigation}) {
     //const cid = route.params?.cid;
     const cid = "hello";
     //const cid = route.params?.cid;
-    const docRef = doc(database, "chat", cid);
     const onSignOut = () => {
         signOut(auth).catch(error => console.log(error));
     };
@@ -52,7 +45,7 @@ export default function Chat({navigation}) {
     }, [navigation]);
     */
 
-const pickImageasync = async () => {
+/*const pickImageasync = async () => {
  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
  let imgURI = null;
@@ -111,39 +104,26 @@ const uploadImageToStorage= async (imgURI ) => {
 };
 
 uploadImageToStorage("what");
-const renderBubble = (props) => {
-  const {currentMessage} = props;
-  if (currentMessage.file && currentMessage.file.url) {
-    return (
-      <TouchableOpacity
-      style={{
-        ...styles.fileContainer,
-        backgroundColor: props.currentMessage.user._id === 2 ? '#2e64e5' : '#efefef',
-        borderBottomLeftRadius: props.currentMessage.user._id === 2 ? 15 : 5,
-        borderBottomRightRadius: props.currentMessage.user._id === 2 ? 5 : 15,
-      }}
-      onPress={() => setFileVisible(true)}
-      >
-        <InChatFileTransfer
-          style={{marginTop: -10}}
-          filePath={currentMessage.file.url}
-        />
-        <InChatViewFile
-            props={props}
-            visible={fileVisible}
-            onClose={() => setFileVisible(false)}
-          />
-        <View style={{flexDirection: 'column'}}>
-          <Text style={{
-                ...styles.fileText,
-                color: currentMessage.user._id === 2 ? 'white' : 'black',
-              }} >
-            {currentMessage.text}
-          </Text>
-        </View>
-      </TouchableOpacity>
+*/
+
+    const renderReplyMessageView = (props) => {
+      if (typeof props.currentMessage.replyMessage == 'string'){
+      return (
+      <View style={styles.replyMessageContainer}>
+        <Text>{props.currentMessage.replyMessage}</Text>
+        <View style={styles.replyMessageDivider} />
+      </View>
     );
-  }
+      }
+    }
+    const RenderMessageBox = (props) => {
+      <ChatMessageBox 
+      {...props}
+      />
+    }
+    const renderBubble = (props) => {
+  const {currentMessage} = props;
+  if (currentMessage.replyMessage)
   return (
     <Bubble
       {...props}
@@ -160,15 +140,6 @@ const renderBubble = (props) => {
     />
   );
 };
-    const renderReplyMessageView = (props) => {
-    props.currentMessage &&
-    props.currentMessage.replyMessage && (
-      <View style={styles.replyMessageContainer}>
-        <Text>{props.currentMessage.replyMessage.text}</Text>
-        <View style={styles.replyMessageDivider} />
-      </View>
-    );
-    }
     const scrollToBottomComponent = () => {
         return <FontAwesome name="angle-double-down" size={22} color="#333" />;
     };
@@ -196,41 +167,46 @@ const renderBubble = (props) => {
                     createdAt: doc.data().createdAt.toDate(),
                     text: doc.data().text,
                     user: doc.data().user,
-                    reply: doc.data().reply,
+                    replyMessage: doc.data().replyMessage,
                 }))
             )
         });
         return () => unsubscribe();
     }, []);
     const onSend = useCallback((messages= []) => {
+      if (replyMessage){
+        messages[0].replyMessage = replyMessage;
+      }
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
         const {_id, createdAt, text, user} = messages[0];
         addDoc(collection(database, 'chat', cid, "chat"), {
             _id, createdAt, text, user, replyMessage
         });
         console.log(messages)
-        console.log(messages)
     });
-      const renderSend = (props) => {
-  return (
-    <View style={{flexDirection: 'row'}}>
-      <TouchableOpacity onPress={() => setShowEmojiPicker((value) => !value)}>
-        <Icon
+    const renderSend = (props) => {
+      return (
+      <View style={{flexDirection: 'row'}}>
+        
+        <Send {...props}>
+        <View style={styles.sendContainer}>
+          <Icon
+            type="font-awesome"
+            name="send"
+            size={28}
+            color='orange'
+          />
+        </View>
+      </Send>
+              <TouchableOpacity onPress={() => setShowEmojiPicker((value) => value)}>
+          <Icon
           type="font-awesome"
-          name="paperclip"
-          style={styles.paperClip}
+          name="smile-o"
           size={28}
-          color='blue'
-        />
-      </TouchableOpacity>
-      <View>
-          {
-              showEmojiPicker ? (
-                  <EmojiPicker/>
-              ) : null
-          }
-          </View>
-    </View>
+          color='gray'/>
+          </TouchableOpacity>
+            </View>
+            
   );
 };
     return (
@@ -245,8 +221,7 @@ const renderBubble = (props) => {
             renderSend={renderSend}
             onPress = {(_, message) => setReplyMessage(message.text)}
             renderAccessory = {renderAccessory}
-            renderBubble={renderBubble}
-
+            renderCustomView={renderReplyMessageView}
         />
     )
         }
@@ -341,3 +316,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
 });
+
+/*
+
+        <TouchableOpacity onPress={() => setShowEmojiPicker((value) => !value)}>
+          <Icon
+          type="font-awesome"
+          name="smile-o"
+          size={28}
+          color='gray'/>
+          </TouchableOpacity>
+          */
