@@ -1,28 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {StyleSheet, Text, View, Button, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert} from "react-native";
-import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth} from "../config/firebase"
 
-export default function Verification() {
-
+export default function ResetPassword({navigation}) {
     const [email, setEmail] = useState("");
-useEffect(() => {
-  if (auth?.currentUser?.emailVerified) {
-    navigation.navigate("Verification")
-  }
-});
+    const onHandleReset = () => {
+        if (email !== "") {
+            sendPasswordResetEmail(auth, email)
+                .then(() => {
+                    navigation.navigate("Signin")
+                }
+                )
+                .catch((err) => Alert.alert("Login error", err.message));
+        }
+    };
     return (
-
         <View style={[styles.container, {flexDirection:'row'}]}>
             <View style={[styles.headerBigBox, {flex:2}]}>
                 <Text style={styles.bigText}>Welcome to</Text>
                 <Image style={styles.logo} source={require('../images/sana-logo.png')}/>
-                <Text style={styles.smallBigText}>Please Verify your Email to Continue</Text>
+                <Text style={styles.smallBigText}>Please Reset your Password to Continue</Text>
             </View>
             <View style={[styles.signInBigBox, {flex:1}]}>
             <View style={styles.signInSmallBox}>
             <SafeAreaView style={styles.form}>
-                <Text style={styles.title}>Verify your Email</Text>
+                <Text style={styles.title}>Password Reset</Text>
                 <Text style={styles.headerTitle}>Email</Text>
                 <TextInput style={styles.input}
                     autoCapitalize="none"
@@ -34,36 +37,19 @@ useEffect(() => {
                     onChangeText={(text) => setEmail(text)} 
                 />
                 <View style={styles.hairline} />
-                <TouchableOpacity style={styles.button} onPress={sendEmailVerification(auth?.currentUser)}>
-                    <Text style={styles.buttonText}>Resend Verification Email</Text>
+                <TouchableOpacity style={styles.button} onPress={onHandleReset}>
+                    <Text style={styles.buttonText}>Send Reset Password Email</Text>
                 </TouchableOpacity>
+                <Text> Remember your Password?
+                <Text style={{color:"red"}}onPress={() => navigation.navigate("Signin")}> Sign In! </Text>
+                </Text>
             </SafeAreaView>
             </View>
         </View>
         </View>
     )
 }
-/*
 
-        <View style={[styles.container, {flexDirection:'row'}]}>
-            <View style={[styles.headerBigBox, {flex:2}]}>
-                <Text style={styles.bigText}>Welcome to</Text>
-                <Image style={styles.logo} source={require('../images/sana-logo.png')}/>
-            </View>
-            <View style={[styles.signInBigBox, {flex:1}]}>
-            <View style={styles.signInSmallBox}>
-            <SafeAreaView style={styles.form}>
-                <Text style={styles.title}>Email Verification</Text>
-                <Text>Please check your email for a verification link to proceed.</Text>
-                <Text style={{color:"red"}}onPress={() => sendEmailVerification(auth.currentUser)}>Resend verification email</Text>
-                <TouchableOpacity style={styles.button} onPress={navigation.navigate("Contacts")}>
-                    <Text style={styles.buttonText}> Proceed</Text>
-                </TouchableOpacity>
-            </SafeAreaView>
-            </View>
-        </View>
-        </View>
-        */
 const styles = StyleSheet.create({
     headerBigBox:{
         alignItems: "center",

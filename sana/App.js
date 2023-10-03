@@ -10,6 +10,8 @@ import Contacts from "./screens/Contacts";
 import Signin from "./screens/Signin"
 import Signup from "./screens/Signup"
 import Verification from "./screens/Verification"
+import ResetPassword from "./screens/ResetPassword"
+import Test from "./screens/Test"
 import Settings from "./screens/Settings"
 import {auth} from "./config/firebase"
 
@@ -37,6 +39,7 @@ function AuthStack() {
   <Stack.Navigator defaultScreenOptions={Signin }>
       <Stack.Screen name="Signin" component={Signin} options={{headerShown: false}} />
       <Stack.Screen name="Signup" component={Signup} options={{headerShown: false}}/>
+      <Stack.Screen name="ResetPassword" component={ResetPassword} options={{headerShown: false}} />
   </Stack.Navigator>
   )
 }
@@ -49,7 +52,15 @@ function ChatStack () {
         title: route.params.userName,
         headerBackTitleVisible: false
       }) }/>
+      <Stack.Screen name="Verification" component={Verification} options={{headerShown: false}} />
       <Stack.Screen name="Home" component={Home} />
+    </Stack.Navigator>
+  )
+}
+function VerificationStack () {
+  return (
+    <Stack.Navigator defaultScreenOptions={Verification}>
+      <Stack.Screen name="Verification" component={Verification} options={{headerShown: true}} />
     </Stack.Navigator>
   )
 }

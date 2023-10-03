@@ -31,8 +31,8 @@ export default function Chat({navigation}) {
     //const navigation = useNavigation();
     //const route = useRoute();
     //const cid = route.params?.cid;
-    const cid = "hello";
-    //const cid = route.params?.cid;
+    //const cid = "hello";
+    const cid = route.params?.cid;
     const onSignOut = () => {
         signOut(auth).catch(error => console.log(error));
     };

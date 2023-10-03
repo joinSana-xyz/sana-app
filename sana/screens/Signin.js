@@ -55,6 +55,9 @@ export default function SignIn({navigation}) {
                 <TouchableOpacity style={styles.button} onPress={onHandleSignIn}>
                     <Text style={styles.buttonText}>Sign In</Text>
                 </TouchableOpacity>
+                <Text> Forgot Password?
+                <Text style={{color:"red"}}onPress={() => navigation.navigate("ResetPassword")}> Reset your Password! </Text>
+                </Text>
                 <Text> New User? 
                 <Text style={{color:"red"}}onPress={() => navigation.navigate("Signup")}> Sign Up! </Text>
                 </Text>
