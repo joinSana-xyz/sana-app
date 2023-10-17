@@ -1,9 +1,12 @@
 import React, {useState, useEffect, useLayoutEffect, useCallback} from "react";
 import {StyleSheet, Text, View, Button, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert} from "react-native";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import DatePicker from 'react-native-date-picker'
 import { auth, database} from "../config/firebase"
 import {doc, setDoc, deleteDoc} from 'firebase/firestore';
+
+//import { Button } from 'react-native-paper';
+import { DatePickerModal } from 'react-native-paper-dates';
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import Signin from "./Signin"
 export default function SignUp({navigation}) {
@@ -15,6 +18,21 @@ export default function SignUp({navigation}) {
     const [birthday, setBirthday] = useState(new Date())
     const cids = ["OgrB6M9OcEkMLLoyqbQ5"]; //conversation IDs
     const gids = [];
+    const [date, setDate] = useState(null);
+    const [open, setOpen] = useState(false);
+
+
+  const onDismissSingle = useCallback(() => {
+    setOpen(false);
+  }, [setOpen]);
+
+  const onConfirmSingle = useCallback(
+    (params) => {
+      setOpen(false);
+      setDate(params.date);
+    },
+    [setOpen, setDate]
+  );
    const onHandleSignUp = () => {
         if (email !== "" && password !== "") {
             createUserWithEmailAndPassword(auth, email, password).then(cred => {
@@ -92,7 +110,15 @@ export default function SignUp({navigation}) {
                 />
                 <View style={styles.hairline} />
                 <Text style={styles.headerTitle}>Birthday</Text>
-                <DatePicker date={birthday} onDateChange={setBirthday} />
+                <TouchableOpacity onPress={() => setOpen(true)}> {date != null ? date.toDateString() : "Choose Date"} </TouchableOpacity>
+        <DatePickerModal
+          locale="en"
+          mode="single"
+          visible={open}
+          onDismiss={onDismissSingle}
+          date={date}
+          onConfirm={onConfirmSingle}
+        />
                 <TouchableOpacity style={styles.button} onPress={onHandleSignUp}>
                     <Text style={styles.buttonText}>Sign Up</Text>
                 </TouchableOpacity>

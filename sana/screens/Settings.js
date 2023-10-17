@@ -14,13 +14,15 @@ export default function Contact({navigation}) {
         <View style={styles.header}>
           <View style={{flexDirection:"row"}}>
             <View style={{flex:0.5}}/>
+            <TouchableOpacity onPress={() => navigation.navigate('Contacts')}>
             <Image style={styles.headerLogo} source={require('../images/sana-logo-2.png')}/>
+            </TouchableOpacity>
             <View style={{flex:6}}/>
             <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
             <Image style={styles.headerLogo} source={require('../images/settings.png')}/>
             </TouchableOpacity>
             <View style={{flex:0.5}}/>
-            <TouchableOpacity onPress={() => navigation.navigate('Chat')}>
+            <TouchableOpacity onPress={() => auth.signOut()}>
             <Image style={styles.headerLogo} source={require('../images/default.svg') }/>
             </TouchableOpacity>
           </View>
@@ -40,11 +42,21 @@ export default function Contact({navigation}) {
 
 
 const styles = StyleSheet.create({
+
     header: {
       flex:1,
-      backgroundColor: "grey",
+      backgroundColor: "#6073b7",
       width: "100vw",
       borderBottomWidth: 6,
+    },
+    bigText:{
+        fontSize: 100,
+        fontFamily: "Futara",
+        fontWeight: "bold",
+    },
+    smallBigText:{
+        fontSize: 40,
+        fontFamily: "Futara",
     },
     headerLogo: {
       width: 90,
@@ -113,11 +125,23 @@ const styles = StyleSheet.create({
         marginTop: 40,
     },
   item: {
-    backgroundColor: '#f9c2ff',
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
+    flexDirection: "row",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  itemTextBox:{
+    flex:2,
+    justifyContent: 'center', 
+    alignItems: 'center'
+  },
+  itemText: {
+    flex:4,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: "black",
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
 });
 
 /*

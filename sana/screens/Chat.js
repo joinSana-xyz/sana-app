@@ -5,106 +5,33 @@ import { GiftedChat, Bubble,
   InputToolbar,
   InputToolbarProps,
   MessageProps, Composer, Send } from "react-native-gifted-chat";
-import {signOut} from 'firebase/auth';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {auth, database} from '../config/firebase';
 import {useRoute } from "@react-navigation/native";
 import { Icon } from 'react-native-elements';
-import {doc, collection, addDoc, arrayUnion, orderBy, query, onSnapshot} from 'firebase/firestore';
-import Animated, {
-	useSharedValue,
-} from "react-native-reanimated";
+import {doc, collection, addDoc, arrayUnion, orderBy, query, onSnapshot, deleteDoc} from 'firebase/firestore';
+//import EmojiSelector from 'react-native-emoji-selector'
+///import * as DocumentPicker from 'react-native-document-picker';
 ///import InChatFileTransfer from '../components/InChatFileTransfer';
 //import InChatViewFile from '../components/InChatViewFile';
+//import ContextMenu from "react-native-context-menu-view";
+import data from '@emoji-mart/data'
+import Picker from '@emoji-mart/react'
 
 import ReplyMessageBar from '../components/ReplyMessageBar';
+
 export default function Chat({navigation}) {
 
     const route = useRoute()
+    const [customText, setCustomText] = useState("");
     const [messages, setMessages] = useState([]);
     const [replyMessage, setReplyMessage] = useState([]);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  //const height = useSharedValue(70);
+    const [showEmoji, setShowEmoji] = useState(false);
+
+
 
 
     const clearReplyMessage = () => setReplyMessage(null);
-    //const navigation = useNavigation();
-    //const route = useRoute();
-    //const cid = route.params?.cid;
-    //const cid = "hello";
     const cid = route.params?.cid;
-    const onSignOut = () => {
-        signOut(auth).catch(error => console.log(error));
-    };
-    /*useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => (
-                <TouchableOpacity style ={{marginRight:10}} onPress={onSignOut}></TouchableOpacity>
-            )
-        })
-    }, [navigation]);
-    */
-
-/*const pickImageasync = async () => {
- const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
- let imgURI = null;
- const hasStoragePermissionGranted = status === "granted";
-
-if(!hasStoragePermissionGranted) return null;
-
- 
- let result = await ImagePicker.launchImageLibraryAsync({
-   mediaTypes: ImagePicker.MediaTypeOptions.Images,
-   allowsEditing: true,
-   aspect: [4, 4],
-   quality: 1,
- });
-
- if (!result.cancelled) {
-   imgURI = result.uri;
- }
-
- return imgURI;
-};
-pickImageasync();
-const uploadImageToStorage= async (imgURI ) => {
-  const ref = `messages/${[FILE_REFERENCE_HERE]}`
-
-  const imgRef = firebase.storage().ref(ref);
-
-  const metadata = { contentType: "image/jpg" };
-  
-
-  // Fetch image data as BLOB from device file manager 
-
-  const blob = await new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.onload = function () {
-      resolve(xhr.response);
-    };
-    xhr.onerror = function (e) {
-      reject(new TypeError("Network request failed"));
-    };
-    xhr.responseType = "blob";
-    xhr.open("GET", imgURI, true);
-    xhr.send(null);
-  });
-  // Put image Blob data to firebase servers
-  await imgRef.put(blob, metadata);
-
-  // We're done with the blob, close and release it
-  blob.close();
-
-  // Image permanent URL
-  const url = await imgRef.getDownloadURL();
-
- 
-  return url
-};
-
-uploadImageToStorage("what");
-*/
 
     const renderReplyMessageView = (props) => {
       if (typeof props.currentMessage.replyMessage == 'string'){
@@ -116,44 +43,16 @@ uploadImageToStorage("what");
     );
       }
     }
-    const RenderMessageBox = (props) => {
-      <ChatMessageBox 
-      {...props}
-      />
+    const deleteMessage = (message) => {
+      if (message.user._id == auth?.currentUser?.email) {
+        deleteDoc(doc(database, 'chat', cid, "chat", message._id))
+      }
     }
-    const renderBubble = (props) => {
-  const {currentMessage} = props;
-  if (currentMessage.replyMessage)
-  return (
-    <Bubble
-      {...props}
-      wrapperStyle={{
-        right: {
-          backgroundColor: '#2e64e5',
-        },
-      }}
-      textStyle={{
-        right: {
-          color: '#efefef',
-        },
-      }}
-    />
-  );
-};
-    const scrollToBottomComponent = () => {
-        return <FontAwesome name="angle-double-down" size={22} color="#333" />;
-    };
-      const renderCustomInputToolbar = (props) => (
-    <InputToolbar
-      {...props}
-      containerStyle={styles.inputContainer}
-      accessoryStyle={styles.replyBarContainer}
-    />
-      )
+
       const renderAccessory = () => (
-    <ReplyMessageBar
-    message = {{text:replyMessage}} clearReply={clearReplyMessage}
-    />
+        <View>
+          <ReplyMessageBar message = {{text:replyMessage}} clearReply={clearReplyMessage} />
+          </View>
     );
     useLayoutEffect(() => {
         const collectionRef = collection(database, "chat", cid, "chat");
@@ -187,30 +86,65 @@ uploadImageToStorage("what");
     const renderSend = (props) => {
       return (
       <View style={{flexDirection: 'row'}}>
-        
         <Send {...props}>
         <View style={styles.sendContainer}>
           <Icon
             type="font-awesome"
             name="send"
             size={28}
-            color='orange'
+            color='#6073b7'
           />
         </View>
-      </Send>
-              <TouchableOpacity onPress={() => setShowEmojiPicker((value) => value)}>
+        </Send>
+        <TouchableOpacity onPress={() => setShowEmoji(!showEmoji)}>
+        <View style={styles.sendContainer}>
+          <Icon
+            type="font-awesome"
+            name="smile-o"
+            size={28}
+            color='#6073b7'
+          />
+        </View>
+        </TouchableOpacity>
+
+        {showEmoji ? <Picker data={data} onEmojiSelect={emoji => setCustomText(customText + emoji.native)} /> : <View/>}
+         </View>
+         );
+        };
+        /*
+        {showEmoji ? <Picker data={data} onEmojiSelect={emoji => setCustomText(customText + emoji.native)} /> : <View/>}*/
+    const renderBubble = (props) => {
+          return (
+      <Bubble
+        {...props}
+        wrapperStyle={{
+          right:{
+            backgroundColor: '#58669c',
+            color: 'white'
+          },
+          left: {
+            backgroundColor: '#f27d5f',
+            color: 'black'
+          }
+        }}
+      />
+    );
+    }
+
+/*
+
+              <TouchableOpacity onPress={() => console.log('funny')}>
           <Icon
           type="font-awesome"
           name="smile-o"
           size={28}
           color='gray'/>
           </TouchableOpacity>
-            </View>
-            
-  );
-};
+*/
     return (
         <GiftedChat
+            text={customText}
+            onInputTextChanged={text => setCustomText(text)}
             messages={messages}
             onSend={messages => onSend(messages)}
             user={{
@@ -220,12 +154,14 @@ uploadImageToStorage("what");
             renderUsernameOnMessage={true}
             renderSend={renderSend}
             onPress = {(_, message) => setReplyMessage(message.text)}
+            onLongPress = {(_, message) => deleteMessage(message)}
             renderAccessory = {renderAccessory}
             renderCustomView={renderReplyMessageView}
+            renderBubble={renderBubble}
         />
     )
         }
-
+//deleteDoc(doc(database, 'chat', cid, "chat", message._id))
 const styles = StyleSheet.create({
     
   inputContainer: {
@@ -327,3 +263,75 @@ const styles = StyleSheet.create({
           color='gray'/>
           </TouchableOpacity>
           */
+
+
+
+              /*useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <TouchableOpacity style ={{marginRight:10}} onPress={onSignOut}></TouchableOpacity>
+            )
+        })
+    }, [navigation]);
+    */
+
+/*const pickImageasync = async () => {
+ const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+ let imgURI = null;
+ const hasStoragePermissionGranted = status === "granted";
+
+if(!hasStoragePermissionGranted) return null;
+
+ 
+ let result = await ImagePicker.launchImageLibraryAsync({
+   mediaTypes: ImagePicker.MediaTypeOptions.Images,
+   allowsEditing: true,
+   aspect: [4, 4],
+   quality: 1,
+ });
+
+ if (!result.cancelled) {
+   imgURI = result.uri;
+ }
+
+ return imgURI;
+};
+pickImageasync();
+const uploadImageToStorage= async (imgURI ) => {
+  const ref = `messages/${[FILE_REFERENCE_HERE]}`
+
+  const imgRef = firebase.storage().ref(ref);
+
+  const metadata = { contentType: "image/jpg" };
+  
+
+  // Fetch image data as BLOB from device file manager 
+
+  const blob = await new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      resolve(xhr.response);
+    };
+    xhr.onerror = function (e) {
+      reject(new TypeError("Network request failed"));
+    };
+    xhr.responseType = "blob";
+    xhr.open("GET", imgURI, true);
+    xhr.send(null);
+  });
+  // Put image Blob data to firebase servers
+  await imgRef.put(blob, metadata);
+
+  // We're done with the blob, close and release it
+  blob.close();
+
+  // Image permanent URL
+  const url = await imgRef.getDownloadURL();
+
+ 
+  return url
+};
+
+uploadImageToStorage("what");
+*/
