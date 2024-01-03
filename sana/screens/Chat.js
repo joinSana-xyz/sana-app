@@ -8,7 +8,7 @@ import { GiftedChat, Bubble,
 import {auth, database} from '../config/firebase';
 import {useRoute } from "@react-navigation/native";
 import { Icon } from 'react-native-elements';
-import {doc, collection, addDoc, arrayUnion, orderBy, query, onSnapshot, deleteDoc} from 'firebase/firestore';
+import {doc, collection, addDoc, setDoc, arrayUnion, orderBy, query, onSnapshot, deleteDoc} from 'firebase/firestore';
 //import EmojiSelector from 'react-native-emoji-selector'
 ///import * as DocumentPicker from 'react-native-document-picker';
 ///import InChatFileTransfer from '../components/InChatFileTransfer';
@@ -26,7 +26,20 @@ export default function Chat({navigation}) {
     const [messages, setMessages] = useState([]);
     const [replyMessage, setReplyMessage] = useState([]);
     const [showEmoji, setShowEmoji] = useState(false);
+    const [someoneElseTyping, setSomeoneElseTyping] = useState(0);
 
+    const notifyTyping = args => {
+        setCustomText(args)
+        const docRef = doc(database, "chat", cid, "typers", auth?.currentUser?.uid);
+        if (args != "") 
+            setDoc(docRef, {
+                isTyping: 1,
+            });
+        else 
+            setDoc(docRef, { 
+            isTyping: 0 
+            });
+    }
 
 
 
@@ -71,6 +84,21 @@ export default function Chat({navigation}) {
             )
         });
         return () => unsubscribe();
+    }, []);
+    useLayoutEffect(() => {
+        const collectionRef = collection(database, "chat", cid, "typers");
+        const quer = query(collectionRef);
+
+        const unsubscribe = onSnapshot(quer, snapshot => {
+            var isSomeoneElseTyping = false; 
+            snapshot.docs.forEach(doc => {
+                console.log(doc.data().isTyping + " " + doc.id); 
+                isSomeoneElseTyping |= (doc.data().isTyping && doc.id != auth?.currentUser?.uid)
+            });
+            setSomeoneElseTyping(isSomeoneElseTyping);
+        });
+        
+        return unsubscribe;
     }, []);
     const onSend = useCallback((messages= []) => {
       if (replyMessage){
@@ -144,7 +172,6 @@ export default function Chat({navigation}) {
     return (
         <GiftedChat
             text={customText}
-            onInputTextChanged={text => setCustomText(text)}
             messages={messages}
             onSend={messages => onSend(messages)}
             user={{
@@ -158,6 +185,8 @@ export default function Chat({navigation}) {
             renderAccessory = {renderAccessory}
             renderCustomView={renderReplyMessageView}
             renderBubble={renderBubble}
+            isTyping={someoneElseTyping}
+            onInputTextChanged={notifyTyping}
         />
     )
         }

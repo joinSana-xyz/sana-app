@@ -8,6 +8,7 @@ import {
 import { authToken, createMeeting } from "../src/api";
 import ReactPlayer from "react-player";
 import {useRoute } from "@react-navigation/native";
+import {auth, database} from '../config/firebase';
 
 function JoinScreen({ getMeetingAndToken }) {
   const [meetingId, setMeetingId] = useState(null);
@@ -141,8 +142,6 @@ function MeetingView(props) {
 }
 
 export default function Video({navigation}) {
-  const route = useRoute()
-  const id = route.params?.meetingId;
   const [meetingId, setMeetingId] = useState(null);
   const getMeetingAndToken = async (id) => {
     const meetingId =
@@ -161,7 +160,7 @@ export default function Video({navigation}) {
         meetingId,
         micEnabled: true,
         webcamEnabled: true,
-        name: "Default Name",
+        name: auth.currentUser?.email,
       }}
       token={authToken}
     >
