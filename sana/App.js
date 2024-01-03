@@ -6,6 +6,7 @@ import { onAuthStateChanged } from "firebase/auth"
 
 import Home from "./screens/Home";
 import Chat from "./screens/Chat";
+import Video from "./screens/Video";
 import Contacts from "./screens/Contacts";
 import Signin from "./screens/Signin"
 import Signup from "./screens/Signup"
@@ -50,6 +51,10 @@ function ChatStack () {
       <Stack.Screen name="Settings" component={Settings} options={{headerShown: true}} />
       <Stack.Screen name="Chat" component={Chat} options={({route}) => ({
         title: route.params.userName,
+        headerBackTitleVisible: false
+      }) }/>
+      <Stack.Screen name="Video" component={Video} options={({route}) => ({
+        title: route.params.cid,
         headerBackTitleVisible: false
       }) }/>
       <Stack.Screen name="Verification" component={Verification} options={{headerShown: false}} />

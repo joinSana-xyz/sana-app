@@ -23,7 +23,7 @@ function addPerson() {
     console.log(newConvo.id);
     //updateDoc(userRef, {cids: arrayUnion(newConvo.id)})
   }
-export default function Contact({navigation}) {
+export default function Contacts({navigation}) {
 
   const [contacts, setContacts] = useState([]);
   const [cids, setCids] = useState([]);
@@ -120,6 +120,14 @@ const addPerson = () => {
                 <View>
                   
               <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('Chat', {userName: item.username, cid: item.cid})}>
+                <TouchableOpacity onPress={() => navigation.navigate('Video', {route: item.username})}>
+                  <Icon
+                    type="font-awesome"
+                    name="phone"
+                    size={70}
+                    color='#393d41'
+                    />
+              </TouchableOpacity>
                 <Icon
                 type="font-awesome"
                 name="user"
@@ -138,6 +146,9 @@ const addPerson = () => {
             <View style={styles.homePart}>
             <Text style={styles.bigText}> Welcome! </Text>
             <Text style={styles.smallBigText}> Select a chat or icon to get started. </Text>
+            <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('Video', {cid: "none"})}>
+            <Text style={styles.bigText}> Join</Text>
+            </TouchableOpacity>
       </View>
       
             </View>
