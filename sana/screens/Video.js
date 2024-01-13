@@ -191,6 +191,12 @@ function Controls() {
       toggleWebcam(customTrack);
     }
   };
+  const getRowCount = (length) => {
+    return length > 2 ? 2 : length > 0 ? 1 : 0;
+  };
+  const getColCount = (length) => {
+    return length < 2 ? 1 : length < 5 ? 2 : 3;
+  };
   const togglePipMode = async () => {
     if (pipWindowRef.current) {
       await document.exitPictureInPicture();
@@ -235,6 +241,7 @@ function Controls() {
       function drawCanvas() {
         //Getting all the video elements in the document
         const videos = document.querySelectorAll("video");
+        console.log(videos)
         try {
           //Perform initial black paint on the canvas
           ctx.fillStyle = "black";

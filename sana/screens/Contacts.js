@@ -136,10 +136,18 @@ const addPerson = () => {
             />
             </View>
             <View style={styles.homePart}>
-            <Text style={styles.bigText}> Welcome! </Text>
-            <Text style={styles.smallBigText}> Select a chat or icon to get started. </Text>
+            <Text style={styles.bigText}>Welcome!</Text>
+            <Text style={styles.smallBigText}>Select a chat or icon to get started.</Text>
             <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('Video', {cid: "none"})}>
-            <Text style={styles.bigText}> Join</Text>
+            <Text style={styles.bigText}>Video Chat: </Text>
+            <View>
+            <Icon style={{flex:1}}
+              type="font-awesome"
+              name="camera"
+              size={100}
+              color='#393d41'
+              />
+              </View>
             </TouchableOpacity>
       </View>
       
