@@ -120,14 +120,6 @@ const addPerson = () => {
                 <View>
                   
               <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('Chat', {userName: item.username, cid: item.cid})}>
-                <TouchableOpacity onPress={() => navigation.navigate('Video', {route: item.username})}>
-                  <Icon
-                    type="font-awesome"
-                    name="phone"
-                    size={70}
-                    color='#393d41'
-                    />
-              </TouchableOpacity>
                 <Icon
                 type="font-awesome"
                 name="user"

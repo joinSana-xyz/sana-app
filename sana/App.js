@@ -55,7 +55,8 @@ function ChatStack () {
       }) }/>
       <Stack.Screen name="Video" component={Video} options={({route}) => ({
         title: route.params.cid,
-        headerBackTitleVisible: false
+        headerBackTitleVisible: false,
+        headerShown:false
       }) }/>
       <Stack.Screen name="Verification" component={Verification} options={{headerShown: false}} />
       <Stack.Screen name="Home" component={Home} />
